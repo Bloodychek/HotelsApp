@@ -1,0 +1,231 @@
+openapi: 3.0.0
+info:
+  title: Property View API
+  description: API для работы с отелями
+  version: 1.0.0
+
+paths:
+  /property-view/hotels:
+    get:
+      summary: Получение списка всех отелей
+      operationId: getHotels
+      responses:
+        '200':
+          description: Список отелей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HotelSummary'
+    post:
+      summary: Создание нового отеля
+      operationId: createHotel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelCreateRequest'
+      responses:
+        '201':
+          description: Отель создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelSummary'
+        '400':
+          description: Ошибка валидации входных данных
+
+  /property-view/hotels/{id}:
+    get:
+      summary: Получение информации об отеле
+      operationId: getHotelById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация об отеле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelDetailResponse'
+
+  /property-view/search:
+    get:
+      summary: Поиск отелей
+      operationId: searchHotels
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: brand
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: county
+          in: query
+          schema:
+            type: string
+        - name: amenities
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список отелей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HotelSummary'
+
+  /property-view/hotels/{id}/amenities:
+    post:
+      summary: Добавление удобств к отелю
+      operationId: addHotelAmenities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelAmenitiesRequest'
+      responses:
+        '200':
+          description: Удобства добавлены
+
+  /property-view/histogram/{param}:
+    get:
+      summary: Получение количества отелей по параметру
+      operationId: getHotelsHistogram
+      parameters:
+        - name: param
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [ brand, city, county, amenities ]
+      responses:
+        '200':
+          description: Гистограмма по параметру
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+
+components:
+  schemas:
+    HotelSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+
+    HotelCreateRequest:
+      type: object
+      required: [ name, brand, address, contacts ]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        brand:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        contacts:
+          $ref: '#/components/schemas/Contacts'
+        arrivalTime:
+          $ref: '#/components/schemas/ArrivalTime'
+
+    HotelDetailResponse:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            brand:
+              type: string
+            address:
+              $ref: '#/components/schemas/Address'
+            contacts:
+              $ref: '#/components/schemas/Contacts'
+            arrivalTime:
+              $ref: '#/components/schemas/ArrivalTime'
+            amenities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Amenity'
+
+    HotelAmenitiesRequest:
+      type: array
+      items:
+        $ref: '#/components/schemas/Amenity'
+
+    Address:
+      type: object
+      properties:
+        houseNumber:
+          type: integer
+          example: 123
+        street:
+          type: string
+        city:
+          type: string
+        county:
+          type: string
+        postCode:
+          type: integer
+          example: 123456
+
+    Contacts:
+      type: object
+      properties:
+        phone:
+          type: string
+        email:
+          type: string
+
+    ArrivalTime:
+      type: object
+      properties:
+        checkIn:
+          type: string
+          format: time
+        checkOut:
+          type: string
+          format: time
+
+    Amenity:
+      type: object
+      properties:
+        name:
+          type: string

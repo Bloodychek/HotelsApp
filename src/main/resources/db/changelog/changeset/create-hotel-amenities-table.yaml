@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Evgeniy
+      changes:
+        - createTable:
+            tableName: hotel_amenities
+            columns:
+              - column:
+                  name: hotel_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_hotel_amenities_hotels
+                    references: hotels(id)
+                    onDelete: CASCADE
+              - column:
+                  name: amenity_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_hotel_amenities_amenities
+                    references: amenities(id)
+                    onDelete: CASCADE
+            constraints:
+              - primaryKey:
+                  columnNames: hotel_id, amenity_id
+                  constraintName: pk_hotel_amenities
